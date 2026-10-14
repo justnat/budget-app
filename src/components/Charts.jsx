@@ -1,0 +1,11 @@
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, BarChart, Bar } from 'recharts';
+import { money } from '../data.js';
+const COLORS=['#247b54','#78aa6b','#c5a970','#d77f68','#7b89ab','#74aaa3','#a994c3','#d2a165','#a7ae9f','#da9ca4'];
+export function ExpenseChart({expenses,currency}) {
+ const groups=Object.values(expenses.reduce((a,x)=>{a[x.category]??={name:x.category,value:0}; a[x.category].value+=x.monthly; return a;},{}));
+ return <div className="chart-wrap"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={groups.length?groups:[{name:'No data',value:1}]} dataKey="value" nameKey="name" innerRadius="65%" outerRadius="88%" paddingAngle={3}>{(groups.length?groups:[{}]).map((_,i)=><Cell key={i} fill={groups.length?COLORS[i%COLORS.length]:'#e5eae5'}/>)}</Pie><Tooltip formatter={v=>money(v,currency)}/><Legend verticalAlign="bottom" height={38}/></PieChart></ResponsiveContainer></div>;
+}
+export function ForecastChart({net,currency}) { let cumulative=0; const data=Array.from({length:13},(_,i)=>{if(i)cumulative+=net;return {month:i?'M'+i:'Now',savings:cumulative};});
+ return <div className="chart-wrap"><ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{top:12,right:12,left:2,bottom:2}}><CartesianGrid strokeDasharray="3 5" vertical={false}/><XAxis dataKey="month" tickLine={false}/><YAxis tickFormatter={v=>`${currency}${Math.round(v/1000)}k`} axisLine={false} tickLine={false}/><Tooltip formatter={v=>money(v,currency)}/><Line type="monotone" dataKey="savings" name="Cumulative savings" stroke="#247b54" strokeWidth={3} dot={false} activeDot={{r:5}}/></LineChart></ResponsiveContainer></div>;
+}
+export function StrategyChart({data,currency}) { return <div className="chart-wrap"><ResponsiveContainer width="100%" height="100%"><BarChart data={data}><CartesianGrid strokeDasharray="3 5" vertical={false}/><XAxis dataKey="name"/><YAxis tickFormatter={v=>`${currency}${Math.round(v/1000)}k`}/><Tooltip formatter={v=>money(v,currency)}/><Legend/><Bar dataKey="target" name="Ideal target" fill="#d8e1d8" radius={[5,5,0,0]}/><Bar dataKey="actual" name="Actual allocation" fill="#247b54" radius={[5,5,0,0]}/></BarChart></ResponsiveContainer></div>; }
